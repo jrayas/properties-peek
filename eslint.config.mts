@@ -7,6 +7,7 @@ export default defineConfig(
 		"node_modules",
 		"dist",
 		"dev",
+		"assets",
 		"scripts",
 		"tests",
 		"esbuild.config.mjs",
