@@ -67,35 +67,40 @@ Obsidian desktop allows users to move panes into separate pop-out windows, each 
 ## 4. CSS Selector Strategy (`styles.css`)
 
 ### 4.1 Reading View, Live Preview, Embeds & Hover Previews
-In Obsidian 1.4+ (including 1.14.x), the in-document Properties UI is rendered inside `.metadata-container` within `.markdown-preview-view` (Reading view, embeds, hover popovers) and `.markdown-source-view` (Live Preview, and Source mode if the fold/properties banner is present):
+In Obsidian 1.4+ (including 1.14.x), the in-document Properties UI is controlled by two CSS custom properties (`--metadata-display-reading` and `--metadata-display-editing`) and rendered inside `.metadata-container` within `.markdown-preview-view` and `.markdown-source-view`.
+
+To avoid using `!important` (flagged by the Obsidian community directory CSS linter), `styles.css` combines Obsidian's native CSS custom properties with higher-specificity selectors:
 
 ```css
-body.properties-peek-hidden .markdown-preview-view .metadata-container,
+body.properties-peek-hidden {
+	--metadata-display-reading: none;
+	--metadata-display-editing: none;
+}
+
+body.properties-peek-hidden .markdown-source-view.is-live-preview.show-properties .metadata-container,
 body.properties-peek-hidden .markdown-source-view .metadata-container,
+body.properties-peek-hidden .markdown-preview-view.show-properties .metadata-container,
+body.properties-peek-hidden .markdown-preview-view .metadata-container,
 body.properties-peek-hidden .markdown-rendered .metadata-container,
 body.properties-peek-hidden .markdown-embed .metadata-container,
-body.properties-peek-hidden .hover-popover .metadata-container {
-	display: none !important;
+body.properties-peek-hidden .hover-popover .metadata-container,
+body.properties-peek-hidden .markdown-preview-view .frontmatter,
+body.properties-peek-hidden .markdown-preview-view .frontmatter-container,
+body.properties-peek-hidden .markdown-preview-view .el-pre.mod-frontmatter {
+	display: none;
 }
 ```
 
 Scoping to markdown views/containers ensures that the standalone **Properties side-panel** (`div.workspace-leaf-content[data-type="file-properties"]`) remains functional and visible even when in-note properties are hidden.
 
-Additionally, in Reading view, Obsidian wraps frontmatter metadata inside `.el-pre.mod-frontmatter` or `.frontmatter-container`:
-```css
-body.properties-peek-hidden .markdown-preview-view .frontmatter,
-body.properties-peek-hidden .markdown-preview-view .frontmatter-container,
-body.properties-peek-hidden .markdown-preview-view .el-pre.mod-frontmatter {
-	display: none !important;
-}
-```
-
-### 4.2 Source Mode (`Apply in Source mode` enabled)
-When the user enables **Apply in Source mode**, `body.properties-peek-hide-source` is added alongside `body.properties-peek-hidden`. In CodeMirror 6 Source mode (`.markdown-source-view:not(.is-live-preview)`), raw YAML frontmatter lines carry `.cm-hmd-frontmatter` tokens (and `.cm-def.cm-hmd-frontmatter` for the `---` delimiters):
+### 4.2 Source Mode (`Apply in source mode` enabled)
+To hide raw YAML frontmatter lines in Source mode without using the `:has()` pseudo-class (which causes broad selector invalidation and is flagged by the Obsidian CSS review bot) or `!important`:
+1. `src/frontmatter-extension.ts` registers a lightweight CodeMirror 6 `ViewPlugin` (`frontmatterLineExtension`) that uses Obsidian's `getFrontMatterInfo()` API to decorate each YAML frontmatter line with `Decoration.line({ attributes: { class: "properties-peek-frontmatter-line" } })`.
+2. When `body.properties-peek-hide-source` is active alongside `body.properties-peek-hidden`, `styles.css` hides those lines directly by class:
 
 ```css
-body.properties-peek-hidden.properties-peek-hide-source .markdown-source-view:not(.is-live-preview) .cm-line:has(.cm-hmd-frontmatter) {
-	display: none !important;
+body.properties-peek-hidden.properties-peek-hide-source .markdown-source-view.mod-cm6:not(.is-live-preview) .cm-line.properties-peek-frontmatter-line {
+	display: none;
 }
 ```
-This collapses the raw YAML frontmatter lines in Source mode with zero layout gap while leaving the underlying document buffer untouched.
+This collapses the raw YAML frontmatter lines in Source mode (including any blank lines or comments inside the frontmatter block) with zero layout gap while leaving the underlying document buffer untouched.

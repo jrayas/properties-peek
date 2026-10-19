@@ -104,6 +104,8 @@ npm i -D -E stylelint@17.16.0 stylelint-no-unsupported-browser-features@8.1.2
   "plugins": ["stylelint-no-unsupported-browser-features"],
   "rules": {
     "declaration-block-no-duplicate-properties": true,
+    "declaration-no-important": true,
+    "selector-pseudo-class-disallowed-list": ["has"],
     "plugin/no-unsupported-browser-features": [true, { "browsers": ["chrome 138"], "severity": "warning" }]
   }
 }

@@ -29,15 +29,19 @@ test("versions.json maps current manifest version to minAppVersion", () => {
 	assert.equal(versions[manifest.version], manifest.minAppVersion);
 });
 
-test("styles.css defines hiding rules for Reading view, Live Preview, embeds, popovers, and Source mode", () => {
+test("styles.css defines hiding rules without !important or :has()", () => {
 	const css = fs.readFileSync(path.join(rootDir, "styles.css"), "utf8");
 	assert.ok(css.includes("body.properties-peek-hidden"));
+	assert.ok(css.includes("--metadata-display-reading: none"));
+	assert.ok(css.includes("--metadata-display-editing: none"));
 	assert.ok(css.includes(".markdown-preview-view .metadata-container"));
 	assert.ok(css.includes(".markdown-source-view .metadata-container"));
 	assert.ok(css.includes(".markdown-embed .metadata-container"));
 	assert.ok(css.includes(".hover-popover .metadata-container"));
 	assert.ok(css.includes("body.properties-peek-hidden.properties-peek-hide-source"));
-	assert.ok(css.includes(".markdown-source-view:not(.is-live-preview)"));
+	assert.ok(css.includes(".cm-line.properties-peek-frontmatter-line"));
+	assert.ok(!css.includes("!important"));
+	assert.ok(!css.includes(":has("));
 });
 
 test("src/settings.ts and src/main.ts use British English and required commands/settings", () => {

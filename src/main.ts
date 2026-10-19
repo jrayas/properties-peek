@@ -1,4 +1,5 @@
 import { Notice, Plugin, setIcon } from "obsidian";
+import { frontmatterLineExtension } from "./frontmatter-extension";
 import {
 	DEFAULT_SETTINGS,
 	type PropertiesPeekSettings,
@@ -25,6 +26,8 @@ export default class PropertiesPeekPlugin extends Plugin {
 		// Apply marker classes as early as possible to prevent startup flash
 		this.applyDomState();
 		this.syncRibbonIcon();
+
+		this.registerEditorExtension(frontmatterLineExtension);
 
 		this.settingTab = new PropertiesPeekSettingTab(this.app, this);
 		this.addSettingTab(this.settingTab);
