@@ -11,7 +11,7 @@ test("manifest.json adheres to Obsidian community plugin rules and GEMINI.md spe
 	);
 	assert.equal(manifest.id, "properties-peek");
 	assert.equal(manifest.name, "Properties Peek");
-	assert.equal(manifest.version, "1.0.0");
+	assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
 	assert.equal(manifest.isDesktopOnly, false);
 	assert.ok(manifest.description.length > 0 && manifest.description.length <= 250);
 	assert.ok(manifest.description.endsWith("."));

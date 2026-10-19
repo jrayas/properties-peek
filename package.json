@@ -1,6 +1,6 @@
 {
 	"name": "properties-peek",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Hide note properties with a single click or hotkey, or take a quick temporary peek before they hide again.",
 	"main": "main.js",
 	"type": "module",
